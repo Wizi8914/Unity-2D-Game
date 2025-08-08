@@ -19,6 +19,8 @@ public class CharacterController2D : MonoBehaviour
     public Animator animator;
     public Transform graphicTransform;
 
+    public float graphicMargin;
+
     [Header("Events")]
     public UnityEvent onFell;
     public UnityEvent onGrounded, onHurt;
@@ -59,6 +61,11 @@ public class CharacterController2D : MonoBehaviour
                 graphicTransform.localScale.y,
                 graphicTransform.localScale.z
             );
+            graphicTransform.localPosition = new Vector3(
+                -graphicMargin,
+                0,
+                0
+            );
         }
         if (movement.x > 0)
         {
@@ -67,6 +74,8 @@ public class CharacterController2D : MonoBehaviour
                 graphicTransform.localScale.y,
                 graphicTransform.localScale.z
             );
+
+            graphicTransform.localPosition = Vector3.zero;
         }
 
         // check jump
