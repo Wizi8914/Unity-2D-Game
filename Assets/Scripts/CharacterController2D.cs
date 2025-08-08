@@ -126,7 +126,6 @@ public class CharacterController2D : MonoBehaviour
 
     bool HorizontalMovement(float movement)
     {
-        // détecter la collision éventuelle
         bool isThereCollision = raycaster.CalculateCollision(
             movement > 0 ? MovementDirection.Right : MovementDirection.Left,
             Mathf.Abs(movement)
