@@ -256,38 +256,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7401730698369143066, guid: 58efc22f40a4780479e35f4fd945a82b, type: 3}
   m_PrefabInstance: {fileID: 259402689}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &329437553 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 7611831978893215349, guid: d05180161906eea4e8116ca04d883257, type: 3}
-  m_PrefabInstance: {fileID: 6765228658305463818}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &329437554 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 4756617607504863456, guid: d05180161906eea4e8116ca04d883257, type: 3}
-  m_PrefabInstance: {fileID: 6765228658305463818}
-  m_PrefabAsset: {fileID: 0}
---- !u!95 &329437556
-Animator:
-  serializedVersion: 7
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 329437553}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 881f74b767ce0ec48bf64b17f37f727b, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -1057,45 +1025,9 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 4756617607504863456, guid: d05180161906eea4e8116ca04d883257, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 4756617607504863456, guid: d05180161906eea4e8116ca04d883257, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 4756617607504863456, guid: d05180161906eea4e8116ca04d883257, type: 3}
-      propertyPath: m_LocalScale.z
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 6317056306320594323, guid: d05180161906eea4e8116ca04d883257, type: 3}
-      propertyPath: m_Sprite
-      value: 
-      objectReference: {fileID: -3318188226485093758, guid: ae72133dacba6ec4eb33ecde48f50e56, type: 3}
     - target: {fileID: 6345664522517943027, guid: d05180161906eea4e8116ca04d883257, type: 3}
-      propertyPath: animator
-      value: 
-      objectReference: {fileID: 329437556}
-    - target: {fileID: 6345664522517943027, guid: d05180161906eea4e8116ca04d883257, type: 3}
-      propertyPath: graphicTransform
-      value: 
-      objectReference: {fileID: 329437554}
-    - target: {fileID: 8920440118977735686, guid: d05180161906eea4e8116ca04d883257, type: 3}
-      propertyPath: m_Size.x
-      value: 1.4721258
-      objectReference: {fileID: 0}
-    - target: {fileID: 8920440118977735686, guid: d05180161906eea4e8116ca04d883257, type: 3}
-      propertyPath: m_Size.y
-      value: 1.3879745
-      objectReference: {fileID: 0}
-    - target: {fileID: 8920440118977735686, guid: d05180161906eea4e8116ca04d883257, type: 3}
-      propertyPath: m_Offset.x
-      value: 0.0042084455
-      objectReference: {fileID: 0}
-    - target: {fileID: 8920440118977735686, guid: d05180161906eea4e8116ca04d883257, type: 3}
-      propertyPath: m_Offset.y
-      value: -0.1811991
+      propertyPath: onJumped.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 9131504006784401004, guid: d05180161906eea4e8116ca04d883257, type: 3}
       propertyPath: m_Name
@@ -1104,10 +1036,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 7611831978893215349, guid: d05180161906eea4e8116ca04d883257, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 329437556}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d05180161906eea4e8116ca04d883257, type: 3}
 --- !u!1001 &7087865763343752108
 PrefabInstance:
