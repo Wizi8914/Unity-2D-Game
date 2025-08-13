@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.InputSystem;
 
 [System.Flags]
 public enum CollisionFlags2D
@@ -27,6 +28,7 @@ public class CharacterController2D : MonoBehaviour
     public UnityEvent<int> onJumped;
     public UnityEvent<CollisionFlags2D> onCollisionStay;
 
+
     [System.NonSerialized] public bool isGrounded;
     [System.NonSerialized] public bool isJumping;
     [System.NonSerialized] public bool isUnderCoyoteTime;
@@ -35,23 +37,33 @@ public class CharacterController2D : MonoBehaviour
     [System.NonSerialized] public int remainingJumps;
     [System.NonSerialized] public CollisionFlags2D collisionFlags;
 
+    // PlayerInput
+    private PlayerInput playerInput;
+
     void Start()
     {
+        playerInput = GetComponent<PlayerInput>();
         animator.SetFloat("WalkSpeed", characterProfile.moveSpeed);
     }
 
+
     void Update()
     {
-        MovementUpdate();
+    MovementUpdate();
     }
 
     void MovementUpdate()
     {
         Vector2 movement = Vector2.zero;
 
-        // check inputs
-        movement.x = Input.GetAxis("Horizontal") * characterProfile.moveSpeed * Time.deltaTime;
-        
+        // Utilise l'action Move du PlayerInput
+        Vector2 moveInput = Vector2.zero;
+        if (playerInput != null && playerInput.actions != null && playerInput.actions["Move"] != null)
+        {
+            moveInput = playerInput.actions["Move"].ReadValue<Vector2>();
+        }
+        movement.x = moveInput.x * characterProfile.moveSpeed * Time.deltaTime;
+
         // adapt graphics
         animator.SetBool("IsMovingHorizontally", movement.x != 0);
         if (movement.x < 0)
@@ -74,12 +86,16 @@ public class CharacterController2D : MonoBehaviour
                 graphicTransform.localScale.y,
                 graphicTransform.localScale.z
             );
-
             graphicTransform.localPosition = Vector3.zero;
         }
 
-        // check jump
-        if (Input.GetKeyDown(KeyCode.Z)) TryJump();        
+        // check jump via PlayerInput
+        bool jumpInput = false;
+        if (playerInput != null && playerInput.actions != null && playerInput.actions["Jump"] != null)
+        {
+            jumpInput = playerInput.actions["Jump"].WasPressedThisFrame();
+        }
+        if (jumpInput) TryJump();
         float jumpMultiplier = 1;
         if (isJumping)
         {
@@ -95,7 +111,6 @@ public class CharacterController2D : MonoBehaviour
                 isJumping = false;
             }
         }
-
         else movement.y = characterProfile.gravity * jumpMultiplier * -1 * Time.deltaTime;
 
         if (isUnderCoyoteTime)
@@ -110,6 +125,18 @@ public class CharacterController2D : MonoBehaviour
 
         Move(movement);
     }
+
+    // Méthodes de callback pour PlayerInput
+    // public void OnMove(InputAction.CallbackContext context)
+    // {
+    //     moveInput = context.ReadValue<Vector2>();
+    // }
+
+    // public void OnJump(InputAction.CallbackContext context)
+    // {
+    //     if (context.performed)
+    //         jumpInput = true;
+    // }
 
     void TryJump()
     {
