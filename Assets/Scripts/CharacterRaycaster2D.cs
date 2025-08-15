@@ -16,6 +16,7 @@ public class CharacterRaycaster2D : MonoBehaviour
     public float skinWidth = 0.02f;
     public LayerMask collidableElements;
     public LayerMask collidableFromAboveOnly;
+    public LayerMask wallLayerMask;
     public Transform self;
     public BoxCollider2D selfBox;
 

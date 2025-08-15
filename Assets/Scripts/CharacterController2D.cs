@@ -31,6 +31,8 @@ public class CharacterController2D : MonoBehaviour
 
     [System.NonSerialized] public bool isGrounded;
     [System.NonSerialized] public bool isJumping;
+    [System.NonSerialized] public int wallJumpDirection = 0;
+    [System.NonSerialized] public bool isWallSliding;
     [System.NonSerialized] public bool isUnderCoyoteTime;
     [System.NonSerialized] public float jumpTimestamp;
     [System.NonSerialized] public float coyoteTimestamp;
@@ -38,42 +40,43 @@ public class CharacterController2D : MonoBehaviour
     [System.NonSerialized] public CollisionFlags2D collisionFlags;
 
     // PlayerInput
-    public PlayerInput playerInput;
+    [HideInInspector] public PlayerInput playerInput;
 
-    // State System
-    public BaseState currentState;
-    public IdleState idleState = new IdleState();
-    public WalkState walkState = new WalkState();
-    public AirState airState = new AirState();
-    public WallSlideState wallSlideState = new WallSlideState();
+    // State Machine
+    private BaseState currentState;
+    public IdleState Idle = new IdleState();
+    public WalkState Walk = new WalkState();
+    public JumpState Jump = new JumpState();
+    public WallSlideState WallSlide = new WallSlideState();
 
     void Start()
     {
         playerInput = GetComponent<PlayerInput>();
         animator.SetFloat("WalkSpeed", characterProfile.moveSpeed);
-                
-        // Start in idle state
-        currentState = idleState;
-        currentState.EnterState(this);
+        currentState = Idle;
     }
+
 
     void Update()
     {
+        MovementUpdate();
         currentState.UpdateState(this);
+        Debug.Log($"Current State: {currentState.GetType().Name}");
     }
 
-    public void ChangeState(BaseState newState)
+    void MovementUpdate()
     {
-        if (currentState != newState)
+        Vector2 movement = Vector2.zero;
+
+        // Utilise l'action Move du PlayerInput
+        Vector2 moveInput = Vector2.zero;
+        if (playerInput != null && playerInput.actions != null && playerInput.actions["Move"] != null)
         {
-            currentState.ExitState(this);
-            currentState = newState;
-            currentState.EnterState(this);
+            moveInput = playerInput.actions["Move"].ReadValue<Vector2>();
         }
         movement.x = moveInput.x * characterProfile.moveSpeed * Time.deltaTime;
 
         // adapt graphics
-        animator.SetBool("IsMovingHorizontally", movement.x != 0);
         if (movement.x < 0)
         {
             graphicTransform.localScale = new Vector3(
@@ -87,7 +90,7 @@ public class CharacterController2D : MonoBehaviour
                 0
             );
         }
-        if (movementX > 0)
+        if (movement.x > 0)
         {
             graphicTransform.localScale = new Vector3(
                 Mathf.Abs(graphicTransform.localScale.x),
@@ -96,17 +99,53 @@ public class CharacterController2D : MonoBehaviour
             );
             graphicTransform.localPosition = Vector3.zero;
         }
+
+        if (playerInput.actions["Jump"].WasPressedThisFrame()) TryJump();
+
+        float jumpMultiplier = 1;
+        if (isJumping)
+        {
+            float timeSinceJumped = Time.time - jumpTimestamp;
+
+            float yPositionCurrentFrame = characterProfile.gravityMultiplierCurve.Evaluate(timeSinceJumped);
+            float yPositionPreviousFrame = characterProfile.gravityMultiplierCurve.Evaluate(timeSinceJumped - Time.deltaTime);
+            movement.y = yPositionCurrentFrame - yPositionPreviousFrame;
+
+            float xMax = characterProfile.gravityMultiplierCurve.keys[characterProfile.gravityMultiplierCurve.keys.Length - 1].time;
+            if (timeSinceJumped > xMax)
+            {
+                isJumping = false;
+            }
+        }
+        else
+        {
+            if (isWallSliding)
+            {
+                movement.y = -characterProfile.wallSlidingSpeed * Time.deltaTime;
+            }
+            else
+            {
+                movement.y = characterProfile.gravity * jumpMultiplier * -1 * Time.deltaTime;
+            }
+        }
+        if (isUnderCoyoteTime)
+            {
+                float timeSinceFell = Time.time - coyoteTimestamp;
+                if (timeSinceFell > characterProfile.maxCoyoteTime)
+                {
+                    remainingJumps--;
+                    isUnderCoyoteTime = false;
+                }
+            }
+
+        Move(movement);
     }
 
-    public bool IsAgainstWall()
-        {
-        return (collisionFlags & CollisionFlags2D.Left) != 0 || (collisionFlags & CollisionFlags2D.Right) != 0;
-    }
-    
     public void TryJump()
     {
-        
+
         if (remainingJumps < 1) return;
+        animator.SetTrigger("Jump");
 
         isUnderCoyoteTime = false;
         isGrounded = false;
@@ -114,7 +153,7 @@ public class CharacterController2D : MonoBehaviour
         jumpTimestamp = Time.time;
         remainingJumps--;
 
-        int jumpIndex = characterProfile.maxAllowedJumps - (remainingJumps+1);
+        int jumpIndex = characterProfile.maxAllowedJumps - (remainingJumps + 1);
         onJumped?.Invoke(jumpIndex);
     }
 
@@ -138,7 +177,7 @@ public class CharacterController2D : MonoBehaviour
             else collisionFlags |= CollisionFlags2D.Left;
             return true;
         }
-        
+
         if (movement > 0) collisionFlags &= ~CollisionFlags2D.Right;
         else collisionFlags &= ~CollisionFlags2D.Left;
         self.Translate(Vector3.right * movement);
@@ -151,7 +190,7 @@ public class CharacterController2D : MonoBehaviour
             movement > 0 ? MovementDirection.Above : MovementDirection.Below,
             Mathf.Abs(movement)
         );
-        
+
         if (isThereCollision)
         {
             if (movement < 0)
@@ -174,16 +213,28 @@ public class CharacterController2D : MonoBehaviour
                 coyoteTimestamp = Time.time;
                 onFell?.Invoke();
             }
-            
+
             collisionFlags &= ~CollisionFlags2D.Below;
             isGrounded = false;
             animator.SetBool("IsGrounded", false);
         }
 
         collisionFlags &= ~CollisionFlags2D.Above;
-        
+
         self.Translate(Vector3.up * movement);
 
         return false;
+    }
+
+    // State Machine
+    
+    public void SwitchState(BaseState newState)
+    {
+        if (currentState != newState)
+        {
+            currentState.ExitState(this);
+            currentState = newState;
+            currentState.EnterState(this);
+        }
     }
 }

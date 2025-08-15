@@ -8,4 +8,7 @@ public class CharacterProfile : ScriptableObject
     public int maxAllowedJumps = 3;
     public float maxCoyoteTime = 0.3f;
     public AnimationCurve gravityMultiplierCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
+    public bool canWallJump = true;
+    public float wallSlidingSpeed = 2f;
+    public int wallJumpForce;
 }
