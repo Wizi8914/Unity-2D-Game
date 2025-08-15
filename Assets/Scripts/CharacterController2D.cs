@@ -38,29 +38,37 @@ public class CharacterController2D : MonoBehaviour
     [System.NonSerialized] public CollisionFlags2D collisionFlags;
 
     // PlayerInput
-    private PlayerInput playerInput;
+    public PlayerInput playerInput;
+
+    // State System
+    public BaseState currentState;
+    public IdleState idleState = new IdleState();
+    public WalkState walkState = new WalkState();
+    public AirState airState = new AirState();
+    public WallSlideState wallSlideState = new WallSlideState();
 
     void Start()
     {
         playerInput = GetComponent<PlayerInput>();
         animator.SetFloat("WalkSpeed", characterProfile.moveSpeed);
+                
+        // Start in idle state
+        currentState = idleState;
+        currentState.EnterState(this);
     }
-
 
     void Update()
     {
-    MovementUpdate();
+        currentState.UpdateState(this);
     }
 
-    void MovementUpdate()
+    public void ChangeState(BaseState newState)
     {
-        Vector2 movement = Vector2.zero;
-
-        // Utilise l'action Move du PlayerInput
-        Vector2 moveInput = Vector2.zero;
-        if (playerInput != null && playerInput.actions != null && playerInput.actions["Move"] != null)
+        if (currentState != newState)
         {
-            moveInput = playerInput.actions["Move"].ReadValue<Vector2>();
+            currentState.ExitState(this);
+            currentState = newState;
+            currentState.EnterState(this);
         }
         movement.x = moveInput.x * characterProfile.moveSpeed * Time.deltaTime;
 
@@ -79,7 +87,7 @@ public class CharacterController2D : MonoBehaviour
                 0
             );
         }
-        if (movement.x > 0)
+        if (movementX > 0)
         {
             graphicTransform.localScale = new Vector3(
                 Mathf.Abs(graphicTransform.localScale.x),
@@ -88,57 +96,14 @@ public class CharacterController2D : MonoBehaviour
             );
             graphicTransform.localPosition = Vector3.zero;
         }
-
-        // check jump via PlayerInput
-        bool jumpInput = false;
-        if (playerInput != null && playerInput.actions != null && playerInput.actions["Jump"] != null)
-        {
-            jumpInput = playerInput.actions["Jump"].WasPressedThisFrame();
-        }
-        if (jumpInput) TryJump();
-        float jumpMultiplier = 1;
-        if (isJumping)
-        {
-            float timeSinceJumped = Time.time - jumpTimestamp;
-
-            float yPositionCurrentFrame = characterProfile.gravityMultiplierCurve.Evaluate(timeSinceJumped);
-            float yPositionPreviousFrame = characterProfile.gravityMultiplierCurve.Evaluate(timeSinceJumped - Time.deltaTime);
-            movement.y = yPositionCurrentFrame - yPositionPreviousFrame;
-
-            float xMax = characterProfile.gravityMultiplierCurve.keys[characterProfile.gravityMultiplierCurve.keys.Length-1].time;
-            if (timeSinceJumped > xMax)
-            {
-                isJumping = false;
-            }
-        }
-        else movement.y = characterProfile.gravity * jumpMultiplier * -1 * Time.deltaTime;
-
-        if (isUnderCoyoteTime)
-        {
-            float timeSinceFell = Time.time - coyoteTimestamp;
-            if (timeSinceFell > characterProfile.maxCoyoteTime)
-            {
-                remainingJumps--;
-                isUnderCoyoteTime = false;
-            }
-        }
-
-        Move(movement);
     }
 
-    // Méthodes de callback pour PlayerInput
-    // public void OnMove(InputAction.CallbackContext context)
-    // {
-    //     moveInput = context.ReadValue<Vector2>();
-    // }
-
-    // public void OnJump(InputAction.CallbackContext context)
-    // {
-    //     if (context.performed)
-    //         jumpInput = true;
-    // }
-
-    void TryJump()
+    public bool IsAgainstWall()
+        {
+        return (collisionFlags & CollisionFlags2D.Left) != 0 || (collisionFlags & CollisionFlags2D.Right) != 0;
+    }
+    
+    public void TryJump()
     {
         
         if (remainingJumps < 1) return;
