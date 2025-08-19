@@ -1,28 +1,19 @@
 using UnityEngine;
 
-/// <summary>
-/// Simple parallax background script that moves objects at different speeds relative to the camera
-/// Attach this script to any background element (mountains, clouds, trees, etc.)
-/// </summary>
 public class ParallaxBackground : MonoBehaviour
 {
     [Header("Parallax Settings")]
     [Range(0f, 1f)]
-    [Tooltip("Speed multiplier for parallax effect. 0 = static, 1 = follows camera exactly")]
     public float parallaxSpeed = 0.5f;
     
     [Header("Movement Options")]
-    [Tooltip("Enable horizontal parallax movement")]
     public bool moveHorizontal = true;
-    [Tooltip("Enable vertical parallax movement")]
     public bool moveVertical = false;
     
     [Header("Infinite Scroll (Optional)")]
-    [Tooltip("Enable infinite scrolling for repeating backgrounds")]
     public bool infiniteScroll = false;
     
     [Header("Debug")]
-    [Tooltip("Show debug information in console")]
     public bool debugMode = false;
     
     // Private variables
@@ -120,9 +111,6 @@ public class ParallaxBackground : MonoBehaviour
         lastCameraPosition = cameraTransform.position;
     }
 
-    /// <summary>
-    /// Handles infinite scrolling for seamless background repetition
-    /// </summary>
     private void HandleInfiniteScroll()
     {
         if (spriteRenderer == null || spriteRenderer.sprite == null) 
@@ -166,9 +154,6 @@ public class ParallaxBackground : MonoBehaviour
         transform.position = currentPosition;
     }
 
-    /// <summary>
-    /// Adjusts the parallax speed at runtime
-    /// </summary>
     /// <param name="newSpeed">New speed value (will be clamped between 0 and 1)</param>
     public void SetParallaxSpeed(float newSpeed)
     {
@@ -179,9 +164,6 @@ public class ParallaxBackground : MonoBehaviour
             Debug.Log($"Parallax: Speed changed for '{gameObject.name}' from {oldSpeed:F2} to {parallaxSpeed:F2}", this);
     }
 
-    /// <summary>
-    /// Resets the object to its starting position
-    /// </summary>
     public void ResetPosition()
     {
         Vector3 oldPosition = transform.position;
@@ -194,18 +176,13 @@ public class ParallaxBackground : MonoBehaviour
             Debug.Log($"Parallax: Position reset for '{gameObject.name}' from {oldPosition} to {startPosition}", this);
     }
     
-    /// <summary>
-    /// Validates and updates parallax settings during runtime in editor
-    /// </summary>
+
     void OnValidate()
     {
         // Ensure parallax speed is within valid range
         parallaxSpeed = Mathf.Clamp01(parallaxSpeed);
     }
     
-    /// <summary>
-    /// Draws debug gizmos in the scene view
-    /// </summary>
     void OnDrawGizmosSelected()
     {
         if (cameraTransform != null)
